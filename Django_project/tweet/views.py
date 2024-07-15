@@ -4,6 +4,7 @@ from .forms import TweetForm , UserRegistrationForm
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
+from .forms import SearchForm
 
 # Create your views here.
 
@@ -66,10 +67,17 @@ def register(request):
             return redirect('tweet_list')
     else:
         form = UserRegistrationForm()
-
-
-
     return render(request, 'registration/register.html', {'form': form})
+
+
+def search_view(request):
+    query = request.GET.get('query', '')
+    if query:
+        results = Tweet.objects.filter(name__icontains=query)  # replace 'name' with the field you want to search
+    else:
+        results = Tweet.objects.none()
+    return render(request, 'tweet/search_results.html', {'form': SearchForm(), 'results': results})
+
 
 
 
