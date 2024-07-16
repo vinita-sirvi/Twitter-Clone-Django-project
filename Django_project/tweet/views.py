@@ -69,15 +69,22 @@ def register(request):
         form = UserRegistrationForm()
     return render(request, 'registration/register.html', {'form': form})
 
+from django.shortcuts import render
+from django.db.models import Q
+from .models import Tweet
 
 def search_view(request):
     query = request.GET.get('query', '')
+    results = []
     if query:
-        results = Tweet.objects.filter(name__icontains=query)  # replace 'name' with the field you want to search
-    else:
-        results = Tweet.objects.none()
-    return render(request, 'tweet/search_results.html', {'form': SearchForm(), 'results': results})
-
-
-
-
+        results = Tweet.objects.filter(
+            Q(user__username__icontains=query) |  # Search in user's username
+            Q(text__icontains=query)              # Search in tweet's text
+        )
+        print("hitting", results)
+    
+    context = {
+        'query': query,
+        'tweets': results,
+    }
+    return render(request, 'tweet_list.html', context)
